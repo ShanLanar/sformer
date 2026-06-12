@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titel %}Aufträge · {{ einstellungen.APP_NAME }}{% endblock %}
+{% block inhalt %}
+  <div class="toolbar">
+    <h2>Aufträge</h2>
+    <a href="/auftrag/neu" class="btn btn-primary">+ Neuer Auftrag</a>
+  </div>
+
+  {% if auftraege %}
+  <table>
+    <thead>
+      <tr>
+        <th>Nummer</th>
+        <th>Titel</th>
+        <th>Kunde</th>
+        <th>Format / Auflage</th>
+        <th>Status</th>
+        <th>Angelegt</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in auftraege %}
+      <tr onclick="location.href='/auftrag/{{ a.id }}'" style="cursor:pointer">
+        <td><strong>{{ a.auftragsnummer }}</strong></td>
+        <td>{{ a.titel }}</td>
+        <td>{{ a.kunde_name }}</td>
+        <td>{{ a.format or "–" }}{% if a.auflage %} · {{ a.auflage }} St.{% endif %}</td>
+        <td><span class="badge" style="background: {{ a.status_enum.farbe }}">{{ a.status_enum.label }}</span></td>
+        <td class="meta">{{ a.erstellt_am.strftime("%d.%m.%Y %H:%M") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="card leer">
+    Noch keine Aufträge erfasst.<br>
+    <a href="/auftrag/neu" class="btn btn-primary" style="margin-top:12px">Ersten Auftrag anlegen</a>
+  </div>
+  {% endif %}
+{% endblock %}

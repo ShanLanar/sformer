@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Druckfreigabe</title>
+</head>
+<body style="margin:0; padding:0; background:#f0f0f0;">
+  <!-- Vorschautext (im Postfach sichtbar, in der Mail versteckt) -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+    Bitte prüfen und geben Sie Auftrag {{ auftrag.auftragsnummer }} frei.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+               style="width:600px; max-width:600px; background:#ffffff; border-radius:10px; overflow:hidden; font-family:Arial,Helvetica,sans-serif;">
+
+          <!-- Kopf: Anthrazit mit orangem Akzentstreifen -->
+          <tr>
+            <td style="background:#2D2D2D; padding:22px 28px; border-bottom:4px solid {{ einstellungen.FARBE_AKZENT }};">
+              <span style="display:inline-block; border:2px solid {{ einstellungen.FARBE_AKZENT }}; color:{{ einstellungen.FARBE_AKZENT }}; font-weight:bold; letter-spacing:1px; padding:5px 10px; border-radius:4px; font-size:18px;">ABE</span>
+            </td>
+          </tr>
+
+          <!-- Inhalt -->
+          <tr>
+            <td style="padding:30px 28px 8px;">
+              <h1 style="margin:0 0 6px; font-size:21px; color:#2D2D2D;">Bitte um Ihre Druckfreigabe</h1>
+              <p style="margin:0; color:#777; font-size:14px;">Auftrag {{ auftrag.auftragsnummer }}</p>
+
+              <p style="margin:18px 0 0; color:#333; font-size:15px; line-height:1.55;">
+                Guten Tag{% if auftrag.kunde_name %} {{ auftrag.kunde_name }}{% endif %},<br>
+                Ihre Druckdaten sind in der Vorstufe geprüft und liegen zur Freigabe bereit.
+                Bitte kontrollieren Sie die Vorschau und erteilen Sie uns Ihre Freigabe.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Auftragsdaten -->
+          <tr>
+            <td style="padding:18px 28px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                     style="background:#faf7f2; border:1px solid #efe7da; border-radius:8px;">
+                <tr><td style="padding:14px 18px; font-size:14px; color:#333;">
+                  <strong style="font-size:15px;">{{ auftrag.titel }}</strong><br>
+                  {% if auftrag.format %}<span style="color:#666;">Format:</span> {{ auftrag.format }}<br>{% endif %}
+                  {% if auftrag.auflage %}<span style="color:#666;">Auflage:</span> {{ auftrag.auflage }} Stück{% endif %}
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Buttons -->
+          <tr>
+            <td style="padding:26px 28px 6px;" align="center">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:0 6px;">
+                    <a href="{{ freigabe_url }}"
+                       style="display:inline-block; background:{{ einstellungen.FARBE_AKZENT }}; color:#ffffff; text-decoration:none; font-weight:bold; font-size:16px; padding:14px 28px; border-radius:8px;">
+                      ✓ Druckfreigabe erteilen
+                    </a>
+                  </td>
+                  <td style="padding:0 6px;">
+                    <a href="{{ freigabe_url }}"
+                       style="display:inline-block; background:#2D2D2D; color:#ffffff; text-decoration:none; font-weight:bold; font-size:16px; padding:14px 22px; border-radius:8px;">
+                      Änderung anfordern
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Fallback-Link -->
+          <tr>
+            <td style="padding:16px 28px 0;" align="center">
+              <p style="margin:0; font-size:12px; color:#999;">
+                Falls die Buttons nicht funktionieren, öffnen Sie diesen Link:<br>
+                <a href="{{ freigabe_url }}" style="color:{{ einstellungen.FARBE_AKZENT }}; word-break:break-all;">{{ freigabe_url }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Ablauf-Hinweis -->
+          {% if ablauf %}
+          <tr>
+            <td style="padding:18px 28px 0;" align="center">
+              <p style="margin:0; font-size:13px; color:#999;">
+                Dieser Freigabe-Link ist gültig bis <strong>{{ ablauf.strftime("%d.%m.%Y") }}</strong>.
+              </p>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:26px 28px; margin-top:10px;">
+              <hr style="border:none; border-top:1px solid #eee; margin:0 0 14px;">
+              <p style="margin:0; font-size:12px; color:#aaa; line-height:1.5;">
+                {{ einstellungen.FIRMA }} · {{ einstellungen.APP_NAME }}<br>
+                Diese E-Mail wurde automatisch aus unserem Vorstufen-Workflow versendet.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block titel %}{{ auftrag.auftragsnummer }} · {{ einstellungen.APP_NAME }}{% endblock %}
+{% block inhalt %}
+  <div class="toolbar">
+    <div>
+      <a href="/" class="meta">← Übersicht</a>
+      <h2 style="margin:4px 0">{{ auftrag.titel }}</h2>
+      <span class="meta">{{ auftrag.auftragsnummer }}</span>
+      <span class="badge" style="background: {{ auftrag.status_enum.farbe }}">{{ auftrag.status_enum.label }}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <dl class="kv">
+      <dt>Kunde</dt><dd>{{ auftrag.kunde_name }}</dd>
+      <dt>E-Mail</dt><dd>{{ auftrag.kunde_email }}</dd>
+      <dt>Format</dt><dd>{{ auftrag.format or "–" }}</dd>
+      <dt>Auflage</dt><dd>{{ auftrag.auflage or "–" }}</dd>
+      {% if auftrag.beschreibung %}<dt>Beschreibung</dt><dd>{{ auftrag.beschreibung }}</dd>{% endif %}
+      <dt>Druckdaten</dt>
+      <dd>
+        {% if auftrag.pdf_dateiname %}
+          <a href="/auftrag/{{ auftrag.id }}/pdf" target="_blank">{{ auftrag.pdf_dateiname }}</a>
+          {% if preflight %}<div class="meta">{{ preflight.text }}</div>{% endif %}
+        {% else %}–{% endif %}
+      </dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Kundenfreigabe</h3>
+    {% if auftrag.freigabe_entscheidung_am %}
+      {% if auftrag.status_enum.value == "freigegeben" %}
+        <p class="hinweis">✅ Vom Kunden <strong>freigegeben</strong> am
+          {{ auftrag.freigabe_entscheidung_am.strftime("%d.%m.%Y %H:%M") }}.</p>
+      {% else %}
+        <p class="hinweis">✏️ Kunde hat eine <strong>Änderung angefordert</strong> am
+          {{ auftrag.freigabe_entscheidung_am.strftime("%d.%m.%Y %H:%M") }}.</p>
+      {% endif %}
+      {% if auftrag.freigabe_kommentar %}
+        <p><em>„{{ auftrag.freigabe_kommentar }}“</em></p>
+      {% endif %}
+    {% elif auftrag.freigabe_aktiv %}
+      <p>Freigabe-Mail versendet – wartet auf Entscheidung des Kunden.</p>
+      <p class="meta">Link gültig bis {{ auftrag.freigabe_token_ablauf.strftime("%d.%m.%Y") }}</p>
+      <p class="meta">Freigabe-Link: <a href="{{ freigabe_url }}" target="_blank">{{ freigabe_url }}</a></p>
+    {% else %}
+      <p class="meta">Noch keine Freigabe-Mail versendet.</p>
+    {% endif %}
+
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+      <form method="post" action="/auftrag/{{ auftrag.id }}/freigabe-senden">
+        <button type="submit" class="btn btn-primary"
+          {% if not auftrag.kunde_email %}disabled title="Keine E-Mail hinterlegt"{% endif %}>
+          {% if auftrag.freigabe_versendet_am %}Freigabe erneut senden{% else %}Freigabe-Mail senden{% endif %}
+        </button>
+      </form>
+      <a href="/auftrag/{{ auftrag.id }}/mail-vorschau" target="_blank" class="btn btn-ghost">Mail-Vorschau</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Status ändern</h3>
+    <form method="post" action="/auftrag/{{ auftrag.id }}/status" style="display:flex; gap:10px; align-items:center">
+      <select name="status">
+        {% for s in Status %}
+        <option value="{{ s.value }}" {% if s.value == auftrag.status %}selected{% endif %}>{{ s.label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-dark">Übernehmen</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Protokoll</h3>
+    <ul class="protokoll">
+      {% for e in auftrag.ereignisse %}
+      <li>
+        <span class="zeit">{{ e.zeitpunkt.strftime("%d.%m.%Y %H:%M") }}</span> · {{ e.text }}
+      </li>
+      {% else %}
+      <li class="meta">Keine Einträge.</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

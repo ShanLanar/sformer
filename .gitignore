@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Laufzeitdaten (nicht versionieren)
+data/
+outbox/
+*.db
+*.sqlite3
+
+# Generierte Vorschau-Artefakte
+freigabe_mail_vorschau.html
+
+# Konfiguration mit Zugangsdaten
+.env
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

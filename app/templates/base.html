@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titel %}{{ einstellungen.APP_NAME }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="marke">
+      <a href="/" class="logo">ABE</a>
+      <div>
+        <h1>{{ einstellungen.APP_NAME }}</h1>
+        <div class="sub">Druckvorstufe · Auftragsverwaltung &amp; Freigabe</div>
+      </div>
+    </div>
+    <a href="/auftrag/neu" class="btn btn-primary btn-sm">+ Neuer Auftrag</a>
+  </header>
+  <main class="container">
+    {% block inhalt %}{% endblock %}
+  </main>
+</body>
+</html>

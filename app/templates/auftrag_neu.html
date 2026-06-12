@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titel %}Neuer Auftrag · {{ einstellungen.APP_NAME }}{% endblock %}
+{% block inhalt %}
+  <div class="toolbar">
+    <h2>Neuer Auftrag</h2>
+    <a href="/" class="btn btn-ghost">Abbrechen</a>
+  </div>
+
+  <div class="card">
+    <form method="post" action="/auftrag/neu" enctype="multipart/form-data">
+      <div class="feld">
+        <label for="titel">Titel / Bezeichnung *</label>
+        <input type="text" id="titel" name="titel" required placeholder="z. B. Visitenkarten Müller GmbH">
+      </div>
+
+      <div class="zeile">
+        <div class="feld">
+          <label for="kunde_name">Kunde *</label>
+          <input type="text" id="kunde_name" name="kunde_name" required>
+        </div>
+        <div class="feld">
+          <label for="kunde_email">Kunden-E-Mail *</label>
+          <input type="email" id="kunde_email" name="kunde_email" required placeholder="kunde@firma.de">
+        </div>
+      </div>
+
+      <div class="zeile">
+        <div class="feld">
+          <label for="format">Format</label>
+          <input type="text" id="format" name="format" placeholder="z. B. DIN A4, 85×55 mm">
+        </div>
+        <div class="feld">
+          <label for="auflage">Auflage</label>
+          <input type="number" id="auflage" name="auflage" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="feld">
+        <label for="beschreibung">Beschreibung / Notizen</label>
+        <textarea id="beschreibung" name="beschreibung" placeholder="Material, Veredelung, Besonderheiten …"></textarea>
+      </div>
+
+      <div class="feld">
+        <label for="pdf">Druckdaten (PDF)</label>
+        <input type="file" id="pdf" name="pdf" accept="application/pdf">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Auftrag anlegen</button>
+    </form>
+  </div>
+{% endblock %}
