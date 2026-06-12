@@ -5,6 +5,10 @@ python-multipart>=0.0.9
 sqlalchemy>=2.0
 pypdf>=4.0
 
-# Nur für den Vorschau-/Test-Renderer (tools/vorschau_render.py):
+# Render ohne InDesign (Stempeln in die Master-PDF) + Vorschau:
 reportlab>=4.0
 pymupdf>=1.24
+qrcode[pil]>=7.4
+
+# Nur zum Prüfen/Auslesen vorhandener QR-Codes (optional, Analyse):
+# opencv-python-headless, pyzbar

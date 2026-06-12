@@ -13,11 +13,13 @@ Helvetica-Ersatz verwendet (Positionen stimmen, Laufweite minimal anders).
 from __future__ import annotations
 
 import re
+import tempfile
 from pathlib import Path
 
 import fitz  # PyMuPDF
 
 from app.feldmapping import auf_merge_felder, variante
+from app.vcard_qr import baue_vcard, qr_png
 from app.xml_import import parse_bestellung
 
 # Variante -> Seitenindex in der Master-PDF
@@ -42,7 +44,38 @@ def _ersetze(text: str, werte: dict[str, str]) -> str:
     return re.sub(r"\s+", " ", out).strip()
 
 
-def _stempel(master_pdf, seite_idx, felder, ziel, fontfile=None) -> Path:
+def _qr_bbox(page) -> "fitz.Rect | None":
+    """Findet die QR-Bounding-Box (dichter Vektor-Cluster) in der unteren linken Ecke."""
+    region = fitz.Rect(4, 80, 98, 152)
+    xs: list[float] = []
+    ys: list[float] = []
+    for d in page.get_drawings():
+        r = d["rect"]
+        if r.x0 >= region.x0 - 1 and r.x1 <= region.x1 + 1 \
+                and r.y0 >= region.y0 - 1 and r.y1 <= region.y1 + 1:
+            xs += [r.x0, r.x1]
+            ys += [r.y0, r.y1]
+    if not xs:
+        return None
+    return fitz.Rect(min(xs), min(ys), max(xs), max(ys))
+
+
+def _ersetze_qr(page, felder: dict, udx: dict) -> bool:
+    """Tauscht den vCard-QR gegen einen mit den echten Personendaten aus."""
+    box = _qr_bbox(page)
+    if box is None:
+        return False
+    vcard = baue_vcard(felder, udx)
+    png = Path(tempfile.mkdtemp()) / "qr.png"
+    qr_png(vcard, png)
+    pad = 2  # pt zusätzlicher weißer Rand (Quiet Zone)
+    cover = fitz.Rect(box.x0 - pad, box.y0 - pad, box.x1 + pad, box.y1 + pad)
+    page.draw_rect(cover, color=(1, 1, 1), fill=(1, 1, 1))
+    page.insert_image(box, filename=str(png))
+    return True
+
+
+def _stempel(master_pdf, seite_idx, felder, ziel, fontfile=None, udx=None) -> Path:
     werte = _werte(felder)
     doc = fitz.open(str(master_pdf))
     page = doc[seite_idx]
@@ -79,7 +112,11 @@ def _stempel(master_pdf, seite_idx, felder, ziel, fontfile=None) -> Path:
             kwargs["fontname"] = "hebo" if j["fett"] else "helv"
         page.insert_text(j["origin"], j["neu"], **kwargs)
 
-    # 4) nur diese Seite behalten und speichern
+    # 4) vCard-QR mit echten Daten austauschen
+    if udx is not None:
+        _ersetze_qr(page, felder, udx)
+
+    # 5) nur diese Seite behalten und speichern
     doc.select([seite_idx])
     ziel = Path(ziel)
     ziel.parent.mkdir(parents=True, exist_ok=True)
@@ -103,8 +140,8 @@ def main(argv: list[str] | None = None) -> int:
     var = variante(karte.udx)
     name = (felder["Vorname"] + "_" + felder["Name"]).replace(" ", "") or "karte"
     ziel = Path(args.out) / f"VK_{name}_{var}_gestempelt.pdf"
-    _stempel(args.master, VARIANTE_SEITE.get(var, 0), felder, ziel, args.font)
-    print(f"Gestempelt: {felder['Vorname']} {felder['Name']} [{var}] -> {ziel}")
+    _stempel(args.master, VARIANTE_SEITE.get(var, 0), felder, ziel, args.font, udx=karte.udx)
+    print(f"Gestempelt (inkl. QR): {felder['Vorname']} {felder['Name']} [{var}] -> {ziel}")
     return 0
 
 
