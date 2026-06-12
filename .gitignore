@@ -14,6 +14,9 @@ outbox/
 
 # Generierte Vorschau-Artefakte
 freigabe_mail_vorschau.html
+render_test/
+ausgabe/
+merge_out/
 
 # Konfiguration mit Zugangsdaten
 .env
